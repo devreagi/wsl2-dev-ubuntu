@@ -1,0 +1,65 @@
+---
+
+- name: Set default text editor to vi
+  become: True
+  become_user: root
+  alternatives:
+    name: editor
+    path: /usr/bin/vim.basic
+
+- name: perform a dist upgrade
+  become: True
+  become_user: root
+  apt:
+    update_cache: yes
+    upgrade: dist
+    force_apt_get: yes
+
+- block:
+    - name: Create directories for golang
+      file:
+        path: "~{{ user }}/{{ item }}"
+        state: directory
+      with_items:
+        - go
+        - go/src
+        - go/bin
+
+    - name: Make GOPATH available in .bashrc
+      lineinfile:
+        path: "~{{ user }}/.bashrc"
+        line: "{{ item }}"
+        create: yes
+      with_items:
+        - export GOPATH=$HOME/go
+        - export PATH=$PATH:$GOPATH/bin
+  become: yes
+  become_user: "{{ user }}"
+
+- name: install bash git prompt
+  git:
+    repo: "{{ base_git_bash_prompt_url }}"
+    dest: "~{{ user }}/.bash-helpers/bash-git-prompt"
+    version: master
+    clone: yes
+    update: yes
+  become: yes
+  become_user: "{{ user }}"
+
+- block:
+    - name: install openssh-server package (1/2)
+      become: True
+      become_user: root
+      apt:
+        name: "{{ base_openssh_server.apt_package }}"
+        state: present
+        force_apt_get: yes
+    - name: enable and start ssh (2/2)
+      become: True
+      become_user: root
+      service:
+        name: "{{ base_openssh_server.service }}"
+        state: started
+        enabled: yes
+
+...

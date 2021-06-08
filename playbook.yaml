@@ -1,0 +1,20 @@
+- hosts: wsl
+  ### Go here to edit variables ###
+  vars_files:
+    - vars/prerequisite_packages.yml
+    - vars/base.yml
+    - vars/user.yml
+    - vars/privacy.yml
+    - vars/vim.yml
+    - vars/zsh.yml
+    - vars/terminal_customizations.yml
+  ### Comment out roles you don't need ###
+  roles:
+    - packages
+    - base
+    - tfonts
+    - vim
+    - zsh
+    - privacy
+  ### Change to your user! ###
+  user: devreagi

@@ -1,0 +1,25 @@
+---
+
+- block:
+    - name: create local fonts directory
+      file:
+        path: "~{{ user }}/.local/share/fonts"
+        state: directory
+  become: yes
+  become_user: "{{ user }}"
+
+- block:
+    - name: download nerd fonts to local fonts folder
+      get_url:
+        url: "{{ item  }}"
+        dest: "~{{ user }}/.local/share/fonts/"
+      with_items: "{{ terminal_customizations_nerd_fonts }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- name: refresh fonts cache
+  shell: "fc-cache -fv"
+  become: yes
+  become_user: "{{ user }}"
+
+...

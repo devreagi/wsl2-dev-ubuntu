@@ -1,0 +1,43 @@
+---
+- name: install zsh and friends
+  become: True
+  become_user: root
+  package: name={{ item }}
+  with_items:
+    - git-core
+    - powerline
+    - zsh
+    - zsh-doc
+
+- name: change user shell to zsh
+  become: yes
+  become_user: root
+  command: chsh -s /bin/zsh {{ user }} 
+
+- name: install antigen
+  git:
+    dest: "~{{ user }}/.antigen"
+    repo: "{{ zsh_antigen_url }}"
+    version: "{{ zsh_antigen_git_version }}"
+  become: yes
+  become_user: "{{ user }}"
+
+- block:
+    - name: check if .zshrc exists in user's home dir
+      stat:
+        path: "~{{ user }}/.zshrc"
+      register: dotzshrc
+
+    - name: backup .zshrc if it exists
+      copy:
+        src: "~{{ user }}/.zshrc"
+        dest: "~{{ user }}/.zshrc.orig"
+      when: dotzshrc.stat.exists
+
+    - name: copy the sample .zshrc file
+      copy:
+        src: .zshrc
+        dest: "~{{ user }}/.zshrc"
+        force: yes
+  become: yes
+  become_user: "{{ user }}"
