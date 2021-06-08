@@ -37,7 +37,7 @@
   become: yes
   become_user: "{{ user  }}"
 
-  - block:
+- block:
     - name: check if .tmux.conf exists in user's home dir
       stat:
         path: "~{{ user }}/.tmux.conf"
